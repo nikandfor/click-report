@@ -17,7 +17,7 @@ clickhouse client --queries-file schema3.sql
 
 echo
 echo Loading data
-clickhouse client --queries-file data3.sql
+clickhouse client --queries-file data4.sql
 
 echo
 echo Check data
@@ -42,3 +42,4 @@ echo
 echo "The same normal qeury again with condition cache disabled, works again"
 clickhouse client --queries-file query.sql --use_query_condition_cache=0 \
 	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
+
