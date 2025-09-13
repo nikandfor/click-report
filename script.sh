@@ -24,22 +24,22 @@ echo Check data
 clickhouse client --query "SELECT count() FROM q"
 
 echo
-echo "Normal qeury, should work"
+echo "Normal qeury, should have non zero result"
 clickhouse client --queries-file query.sql \
 	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
 
 echo
-echo "Query with different argument, expected to receive value: 0"
+echo "Query with different argument, expected to receive 0"
 clickhouse client --queries-file query.sql \
 	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('00000000-0000-0000-0000-000000000000',2)"
 
 echo
-echo "The same normal qeury again, doesn't work"
+echo "The same normal qeury again, should have non zero result <=========== note here"
 clickhouse client --queries-file query.sql \
 	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
 
 echo
-echo "The same normal qeury again with condition cache disabled, works again"
+echo "The same normal qeury again with condition cache disabled, works now"
 clickhouse client --queries-file query.sql --use_query_condition_cache=0 \
 	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
 
