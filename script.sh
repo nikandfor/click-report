@@ -9,41 +9,36 @@ do
 	sleep 1s
 done
 
-echo
-
 cd /data
 
+echo
 echo Loading schema
-clickhouse client --queries-file schema.sql
+clickhouse client --queries-file schema3.sql
 
+echo
 echo Loading data
-n=10
-total=$(wc -l <data.tsv)
+clickhouse client --queries-file data3.sql
 
-#while read -r row; do
-for ((i=1; i<=$total; i+=$n)); do
-	end_line=$((i + n - 1))
-	echo "Processing rows $i to $end_line of $total"
-	sed -n "${i},${end_line}p" data.tsv |
-		clickhouse client --query 'INSERT INTO q FORMAT TabSeparated'
-done
-#done <data.tsv
-
+echo
 echo Check data
 clickhouse client --query "SELECT count() FROM q"
 
+echo
 echo "Normal qeury, should work"
 clickhouse client --queries-file query.sql \
-	--external --file - --name _params --structure 'arg0 Tuple(id UUID, ver Int32), arg1 Tuple(id UUID, ver Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)	('3c2b5a64-d7a9-42d4-9f1c-974d489559ae',1)"
+	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
 
+echo
 echo "Query with different argument, expected to receive value: 0"
 clickhouse client --queries-file query.sql \
-	--external --file - --name _params --structure 'arg0 Tuple(id UUID, ver Int32), arg1 Tuple(id UUID, ver Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482e000',2)	('3c2b5a64-d7a9-42d4-9f1c-974d489559ae',1)"
+	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('00000000-0000-0000-0000-000000000000',2)"
 
+echo
 echo "The same normal qeury again, doesn't work"
 clickhouse client --queries-file query.sql \
-	--external --file - --name _params --structure 'arg0 Tuple(id UUID, ver Int32), arg1 Tuple(id UUID, ver Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)	('3c2b5a64-d7a9-42d4-9f1c-974d489559ae',1)"
+	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
 
+echo
 echo "The same normal qeury again with condition cache disabled, works again"
 clickhouse client --queries-file query.sql --use_query_condition_cache=0 \
-	--external --file - --name _params --structure 'arg0 Tuple(id UUID, ver Int32), arg1 Tuple(id UUID, ver Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)	('3c2b5a64-d7a9-42d4-9f1c-974d489559ae',1)"
+	--external --file - --name _params --structure 'arg0 Tuple(UUID, Int32)' <<<"('2e5d8c78-4e4e-488f-84c5-31222482eaa6',2)"
